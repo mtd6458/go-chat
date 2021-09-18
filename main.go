@@ -21,7 +21,7 @@ func (t *templateHandler) ServeHTTP(write http.ResponseWriter, request *http.Req
 	t.once.Do(func() {
 		t.templ = template.Must(template.ParseFiles(filepath.Join("templates", t.filename)))
 	})
-	err := t.templ.Execute(write, nil)
+	err := t.templ.Execute(write, request)
 	if err != nil {
 		log.Fatal("template execute:", err)
 	}
@@ -29,7 +29,9 @@ func (t *templateHandler) ServeHTTP(write http.ResponseWriter, request *http.Req
 
 func main() {
 	var addr = flag.String("addr", ":8080", "アプリケーションのアドレス")
-	flag.Parse() // フラグを解釈する
+	// フラグを解釈する。
+	// コマンドラインで指定された文字列から必要な情報を取り出し*addrにセット。
+	flag.Parse()
 
 	r := newRoom()
 	// ルート
