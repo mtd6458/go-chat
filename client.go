@@ -7,11 +7,12 @@ import (
 
 // Clientはチャットを行なっている1人のユーザを表します
 type client struct {
-	// socketはこのクライアントの為のWebSocketです。
+	// socketはクライアントと通信を行うためのWebSocketを参照する。
 	socket *websocket.Conn
 	// sendはメッセージが送られるチャネルです。
+	// 受信したメッセージが待ち行列のように蓄積され、WebSocketを通じてユーザのブラウザに送られるのを待機する。
 	send chan []byte
-	// roomはこのクライアントが参加しているチャットルームです。
+	// roomはこのクライアントが参加しているチャットルームへの参照が保持される。
 	room *room
 }
 
