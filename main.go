@@ -16,7 +16,8 @@ type templateHandler struct {
 	templ    *template.Template
 }
 
-// ServeHttp メソッド呼び出しする時にonceの値は常に同じものを使う必要があるので、このレシーバはポインタである必要がある
+// ServeHttp メソッド呼び出しする時にonceの値は常に同じものを使う必要があるので、
+// このレシーバはポインタである必要がある
 func (t *templateHandler) ServeHTTP(write http.ResponseWriter, request *http.Request) {
 	t.once.Do(func() {
 		t.templ = template.Must(template.ParseFiles(filepath.Join("templates", t.filename)))
