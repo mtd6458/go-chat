@@ -2,8 +2,10 @@ package main
 
 import (
 	"flag"
+	"github.com/chat/trace"
 	"log"
 	"net/http"
+	"os"
 	"path/filepath"
 	"sync"
 	"text/template"
@@ -35,6 +37,8 @@ func main() {
 	flag.Parse()
 
 	r := newRoom()
+	// 引数に出力先を渡す。Stdoutつまり標準出力。
+	r.tracer = trace.New(os.Stdout)
 	// ルート
 	http.Handle("/", &templateHandler{filename: "chat.html"})
 	http.Handle("/room", r)
