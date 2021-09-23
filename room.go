@@ -66,22 +66,35 @@ const (
 	messageBufferSize = 256
 )
 
+// HTTP接続をアップグレードするために、websocket.Upgrader構造体を生成する。
+// この値は再利用できるため、一つ生成するだけでOK
 var upgrader = &websocket.Upgrader{ReadBufferSize: socketBufferSize, WriteBufferSize: socketBufferSize}
 
+// room構造体にServeHTTPを持つことで、 http.handlerのインタフェースを満たすことになり、
+// roomはHTTPハンドラとして扱えるようになる。
+// その結果、HTTPリクエストが発生すると ServeHTTPが呼び出される。
 func (r *room) ServeHTTP(write http.ResponseWriter, request *http.Request) {
+	// Upgradeメソッドを呼び出しWebSocketをコネクションを取得
 	socket, err := upgrader.Upgrade(write, request, nil)
 	if err != nil {
 		log.Fatal("ServeHTTP:", err)
 	}
 
+	// クライアント生成
 	client := &client{
 		socket: socket,
 		send:   make(chan []byte, messageBufferSize),
 		room:   r,
 	}
 
+	// チャットルームのjoinチャネルに渡す。
 	r.join <- client
+	// 終了時に退室処理を行う
 	defer func() { r.leave <- client }()
+
+	// writeメソッドをgoroutineで実行する。(並行処理)
 	go client.write()
+	// メインのスレッドでreadメソッドを実行。
+	// 接続が保持され終了を指示されるまで他の処理はブロックされる。
 	client.read()
 }

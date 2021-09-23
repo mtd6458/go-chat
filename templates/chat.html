@@ -19,12 +19,14 @@
                 var socket = null;
                 var msgBox = $("#chatbox textarea");
                 var messages = $("#messages")
+                // フォームの送信が実行されるとsubmitが実行される
                 $("#chatbox").submit(function (){
                     if (!msgBox.val()) return false;
                     if (!socket) {
                         alert("エラー: WebSocket接続NG");
                         return false;
                     }
+                    // メッセージがサーバに送信される。
                     socket.send(msgBox.val());
                     msgBox.val("");
                     return false;
@@ -35,9 +37,12 @@
                 } else {
                     // WebSocket接続を開始
                     socket = new WebSocket("ws://{{.Host}}/room");
+                    // ハンドラ設定
                     socket.onclose = function () {
                         alert("接続が終了しました");
                     }
+                    // ハンドラ設定
+                    // WebSocketがメッセージを受信すると箇条書きの要素にメッセージが追加される
                     socket.onmessage = function (e) {
                         messages.append($("<li>").text(e.data));
                     }
