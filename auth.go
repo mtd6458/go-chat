@@ -7,6 +7,7 @@ type authHandler struct {
 }
 
 func (h *authHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	// authというkeyでクッキーを取り出す
 	if _, err := r.Cookie("auth"); err == http.ErrNoCookie {
 		// 未認証
 		w.Header().Set("Location", "/login")
