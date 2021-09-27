@@ -41,6 +41,8 @@ func main() {
 	r.tracer = trace.New(os.Stdout)
 	// ルート
 	http.Handle("/", &templateHandler{filename: "chat.html"})
+	http.Handle("/chat", MustAuth(&templateHandler{filename: "chat.html"}))
+	http.Handle("/login", MustAuth(&templateHandler{filename: "login.html"}))
 	http.Handle("/room", r)
 	// チャットルームを開始します。
 	// チャットルームはgoroutineとして実行され、チャット関連の処理はバックグラウンドで行われる。
