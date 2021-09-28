@@ -39,8 +39,9 @@ func main() {
 	r := newRoom()
 	// 引数に出力先を渡す。Stdoutつまり標準出力。
 	r.tracer = trace.New(os.Stdout)
+
 	// ルート
-	http.Handle("/", &templateHandler{filename: "chat.html"})
+	// *authHandlerのServeHTTPが実行され、認証が成功した場合にのみ*templateHandlerのServeHTTPが実行される
 	http.Handle("/chat", MustAuth(&templateHandler{filename: "chat.html"}))
 	http.Handle("/login", MustAuth(&templateHandler{filename: "login.html"}))
 	http.Handle("/room", r)
