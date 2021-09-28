@@ -43,7 +43,7 @@ func main() {
 	// ルート
 	// *authHandlerのServeHTTPが実行され、認証が成功した場合にのみ*templateHandlerのServeHTTPが実行される
 	http.Handle("/chat", MustAuth(&templateHandler{filename: "chat.html"}))
-	http.Handle("/login", MustAuth(&templateHandler{filename: "login.html"}))
+	http.Handle("/login", &templateHandler{filename: "login.html"})
 	http.Handle("/room", r)
 	// チャットルームを開始します。
 	// チャットルームはgoroutineとして実行され、チャット関連の処理はバックグラウンドで行われる。
