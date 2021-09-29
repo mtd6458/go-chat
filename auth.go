@@ -1,6 +1,11 @@
 package main
 
-import "net/http"
+import (
+	"fmt"
+	"log"
+	"net/http"
+	"strings"
+)
 
 type authHandler struct {
 	next http.Handler
@@ -9,6 +14,7 @@ type authHandler struct {
 func (h *authHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// authというkeyでクッキーを取り出す
 	if _, err := r.Cookie("auth"); err == http.ErrNoCookie {
+		log.Println(err)
 		// 未認証
 		w.Header().Set("Location", "/login")
 		w.WriteHeader(http.StatusTemporaryRedirect)
@@ -23,4 +29,23 @@ func (h *authHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 func MustAuth(handler http.Handler) http.Handler {
 	return &authHandler{next: handler}
+}
+
+// loginHandler はサードパーティへのログインの処理を待ち受ける。
+// 内部状態を保持する必要がない為、http.Handlerインタフェースは実装していない。
+func loginHandler(w http.ResponseWriter, r *http.Request) {
+	// パスの文字列を分割
+	// パスの形式: /auth/{action}/{provider}
+	segs := strings.Split(r.URL.Path, "/")
+	// FIXME segs[2]とsegs[3]が必ず存在すると仮定している為、不完全なパスが指定されているとコネクションが切断される
+	// 例えば、/auth/nonsense のようなアクセスだと切れる。
+	action := segs[2]
+	provider := segs[3]
+	switch action {
+	case "login":
+		log.Println("TODO: ログイン処理", provider)
+	default:
+		w.WriteHeader(http.StatusNotFound)
+		_, _ = fmt.Fprintf(w, "アクション%sには非対応です", action)
+	}
 }
