@@ -3,6 +3,8 @@ package main
 import (
 	"flag"
 	"github.com/chat/trace"
+	"github.com/stretchr/gomniauth"
+	"github.com/stretchr/gomniauth/providers/facebook"
 	"log"
 	"net/http"
 	"os"
@@ -35,7 +37,11 @@ func main() {
 	// フラグを解釈する。
 	// コマンドラインで指定された文字列から必要な情報を取り出し*addrにセット。
 	flag.Parse()
-
+	// Gomniauthのセットアップ
+	gomniauth.SetSecurityKey( /* セキュリティキー */ )
+	gomniauth.WithProviders(
+		facebook.New("クライアントID", "秘密の値", "http://localhost:8080/auth/callback/facebook"),
+	)
 	r := newRoom()
 	// 引数に出力先を渡す。Stdoutつまり標準出力。
 	r.tracer = trace.New(os.Stdout)
