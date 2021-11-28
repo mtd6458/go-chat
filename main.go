@@ -52,7 +52,7 @@ func main() {
 	http.Handle("/login", &templateHandler{filename: "login.html"})
 	// 動的に値を変更しなくても良い関数の場合、HandleFuncを使う。
 	// HandleFuncを使うとわざわざ構造体を定義しなくても良く、ServeHTTPという関数名に縛られることもない
-	http.HandleFunc("/auth", loginHandler)
+	http.HandleFunc("/auth/", loginHandler)
 	http.Handle("/room", r)
 	// チャットルームを開始します。
 	// チャットルームはgoroutineとして実行され、チャット関連の処理はバックグラウンドで行われる。
