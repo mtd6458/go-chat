@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/stretchr/gomniauth"
+	"github.com/stretchr/objx"
 	"log"
 	"net/http"
 	"strings"
@@ -43,15 +44,40 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 	provider := segs[3]
 	switch action {
 	case "login":
-		provider, err := gomniauth.Provider(provider)
+		p, err := gomniauth.Provider(provider)
 		if err != nil {
-			log.Fatalln("認証プロバイダーの取得に失敗しました:", provider, "-", err)
+			log.Fatalln("認証プロバイダーの取得に失敗しました:", p, "-", err)
 		}
-		loginUrl, err := provider.GetBeginAuthURL(nil, nil)
+		loginUrl, err := p.GetBeginAuthURL(nil, nil)
 		if err != nil {
-			log.Fatalln("GetBeginAuthURLの呼び出し中にエラーが発生しました:", provider, "-",err)
+			log.Fatalln("GetBeginAuthURLの呼び出し中にエラーが発生しました:", p, "-",err)
 		}
 		w.Header().Set("Location", loginUrl)
+		w.WriteHeader(http.StatusTemporaryRedirect)
+	case "callback":
+		p, err := gomniauth.Provider(provider)
+		if err != nil {
+			log.Fatalln("認証プロバイダーの取得に失敗しました:", p, "-", err)
+		}
+		creds, err := p.CompleteAuth(objx.MustFromURLQuery(r.URL.RawQuery))
+		if err != nil {
+			log.Fatalln("認証を完了出来ませんでした:", p, "-", err)
+		}
+
+		user, err := p.GetUser(creds)
+		if err != nil {
+			log.Fatalln("ユーザの取得に失敗しました:", p, "-", err)
+
+		}
+		authCookeieValue := objx.New(map[string]interface{} {
+			"name": user.Name(),
+		}).MustBase64()
+		http.SetCookie(w, &http.Cookie{
+			Name:       "auth",
+			Value:      authCookeieValue,
+			Path:       "/",
+		})
+		w.Header()["Location"] = []string{"/chat"}
 		w.WriteHeader(http.StatusTemporaryRedirect)
 	default:
 		w.WriteHeader(http.StatusNotFound)
